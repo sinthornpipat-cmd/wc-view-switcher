@@ -1,0 +1,387 @@
+/* ==========================================================
+   WC View Switcher – v1.0.1
+   ========================================================== */
+:root{
+  --wcvs-dark:#0d2b3a;
+  --wcvs-card:#f6f6f6;
+  --wcvs-border:#e4e7ec;
+  --wcvs-sale:#e2401c;
+  --wcvs-cols:5;
+}
+
+/* ---------- Toolbar ---------- */
+.wcvs-toolbar{
+  display:flex !important;align-items:center;justify-content:flex-end;flex-wrap:wrap;
+  gap:12px 16px;width:100%;box-sizing:border-box;margin:0 0 28px !important;
+}
+.wcvs-toolbar .woocommerce-result-count{
+  margin:0 auto 0 0 !important;float:none !important;
+}
+.wcvs-toolbar .woocommerce-ordering{margin:0 !important;float:none !important}
+.wcvs-toolbar .woocommerce-ordering select{
+  height:48px;min-width:200px;padding:0 44px 0 22px;border:1px solid var(--wcvs-border);
+  border-radius:999px;background-color:#fff;
+}
+.wcvs-switch{display:flex;align-items:center;gap:8px;margin:0}
+.wcvs-label{margin-right:4px;white-space:nowrap}
+.wcvs-btn{
+  width:48px;height:48px;padding:0;border-radius:50% !important;
+  border:1px solid var(--wcvs-border) !important;background:#fff !important;color:var(--wcvs-dark) !important;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;box-shadow:none;
+}
+.wcvs-btn:hover{border-color:var(--wcvs-dark) !important}
+.wcvs-btn.is-active{background:var(--wcvs-dark) !important;color:#fff !important;border-color:var(--wcvs-dark) !important}
+
+/* ---------- Container ---------- */
+body[class*="wcvs-view-"] ul.products{
+  display:grid !important;gap:20px;width:100% !important;max-width:100%;
+  margin:0 !important;padding:0 !important;list-style:none;box-sizing:border-box;
+}
+body[class*="wcvs-view-"] ul.products::before,
+body[class*="wcvs-view-"] ul.products::after{content:none !important;display:none !important}
+
+/* ---------- Card ---------- */
+body[class*="wcvs-view-"] ul.products li.product{
+  float:none !important;width:auto !important;min-width:0;max-width:100%;
+  margin:0 !important;padding:16px !important;box-sizing:border-box;position:relative;
+  display:flex !important;flex-direction:column;
+  background:var(--wcvs-card);border:1px solid var(--wcvs-border);border-radius:24px;
+  overflow:visible !important;transition:transform .2s,box-shadow .2s,border-color .2s;
+}
+body[class*="wcvs-view-"] ul.products li.product:hover{
+  transform:translateY(-3px);box-shadow:0 10px 24px rgba(13,43,58,.10);border-color:#cfd5de;
+}
+body[class*="wcvs-view-"] ul.products li.product a{outline:none}
+
+/* รูป */
+body[class*="wcvs-view-"] ul.products li.product img{
+  display:block;width:100% !important;height:auto;aspect-ratio:1/1;object-fit:cover;
+  margin:0 !important;border-radius:16px;background:#fff;
+}
+/* ชื่อ */
+body[class*="wcvs-view-"] ul.products li.product .woocommerce-loop-product__title{
+  color:var(--wcvs-dark);font-size:1.05rem;line-height:1.4;font-weight:600;
+  margin:16px 0 8px !important;padding:0 !important;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+/* ราคา */
+body[class*="wcvs-view-"] ul.products li.product .price{
+  display:block;margin:0 0 16px !important;padding:0 !important;color:var(--wcvs-dark);font-weight:700;
+}
+body[class*="wcvs-view-"] ul.products li.product .price del{opacity:.5;font-weight:400;margin-right:6px}
+body[class*="wcvs-view-"] ul.products li.product .price ins{color:var(--wcvs-sale);text-decoration:none;background:none}
+/* ป้ายลดราคา – อยู่ในการ์ด ไม่โดนตัด */
+body[class*="wcvs-view-"] ul.products li.product .onsale{
+  position:absolute !important;top:26px !important;right:26px !important;left:auto !important;bottom:auto !important;
+  margin:0 !important;z-index:3;
+}
+
+/* ปุ่ม Add to cart: อยู่ในการ์ด ล่างสุด เต็มความกว้าง (ไม่ลอยแล้ว) */
+body[class*="wcvs-view-"] ul.products li.product a.button,
+body[class*="wcvs-view-"] ul.products li.product .add_to_cart_button{
+  position:static !important;inset:auto !important;transform:none !important;opacity:1 !important;visibility:visible !important;
+  display:block;width:100% !important;box-sizing:border-box;margin:auto 0 0 !important;
+  text-align:center;padding:14px 20px;border-radius:999px;
+  background:var(--wcvs-dark);color:#fff;border:0;line-height:1.2;
+}
+body[class*="wcvs-view-"] ul.products li.product a.button:hover{background:#000;color:#fff}
+body[class*="wcvs-view-"] ul.products li.product .added_to_cart{display:block;text-align:center;margin-top:8px}
+.wcvs-details-btn{display:none !important}
+
+/* ---------- GRID ---------- */
+body.wcvs-view-grid ul.products{grid-template-columns:repeat(var(--wcvs-cols),minmax(0,1fr))}
+
+/* ---------- LIST ---------- */
+body.wcvs-view-list ul.products{grid-template-columns:minmax(0,1fr)}
+body.wcvs-view-list ul.products li.product{
+  display:grid !important;grid-template-columns:180px minmax(0,1fr) 240px;
+  grid-template-rows:1fr 1fr;column-gap:32px;align-items:center;padding:24px 32px !important;
+}
+body.wcvs-view-list ul.products li.product:hover{transform:none}
+body.wcvs-view-list ul.products li.product .woocommerce-LoopProduct-link{display:contents}
+body.wcvs-view-list ul.products li.product img{grid-column:1;grid-row:1 / span 2;width:180px !important}
+body.wcvs-view-list ul.products li.product .woocommerce-loop-product__title{
+  grid-column:2;grid-row:1;align-self:end;margin:0 0 6px !important;font-size:1.15rem;-webkit-line-clamp:3;
+}
+body.wcvs-view-list ul.products li.product .price{grid-column:2;grid-row:2;align-self:start;margin:0 !important}
+body.wcvs-view-list ul.products li.product a.button,
+body.wcvs-view-list ul.products li.product .add_to_cart_button{
+  grid-column:3;grid-row:1;align-self:end;margin:0 0 6px !important;padding:16px 20px;
+}
+body.wcvs-view-list .wcvs-details-btn{
+  display:block !important;grid-column:3;grid-row:2;align-self:start;text-align:center;
+  background:#ebebeb;color:var(--wcvs-dark);border-radius:999px;padding:16px 20px;text-decoration:none;
+}
+body.wcvs-view-list .wcvs-details-btn:hover{background:#dfdfdf}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1200px){ body.wcvs-view-grid ul.products{grid-template-columns:repeat(4,minmax(0,1fr))} }
+@media (max-width:960px){
+  body.wcvs-view-grid ul.products{grid-template-columns:repeat(3,minmax(0,1fr))}
+  body.wcvs-view-list ul.products li.product{grid-template-columns:140px minmax(0,1fr) 200px;column-gap:20px}
+  body.wcvs-view-list ul.products li.product img{width:140px !important}
+}
+@media (max-width:680px){
+  .wcvs-toolbar .woocommerce-result-count{width:100%;margin-bottom:4px !important}
+  .wcvs-toolbar{justify-content:space-between}
+  .wcvs-toolbar .woocommerce-ordering select{min-width:0;width:100%}
+  body.wcvs-view-grid ul.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  body[class*="wcvs-view-"] ul.products li.product{padding:12px !important;border-radius:18px}
+  body.wcvs-view-list ul.products li.product{
+    grid-template-columns:96px minmax(0,1fr);grid-template-rows:auto auto auto auto;column-gap:14px;padding:14px !important;
+  }
+  body.wcvs-view-list ul.products li.product img{width:96px !important;grid-row:1 / span 2}
+  body.wcvs-view-list ul.products li.product .woocommerce-loop-product__title{grid-row:1;font-size:1rem}
+  body.wcvs-view-list ul.products li.product .price{grid-row:2}
+  body.wcvs-view-list ul.products li.product a.button,
+  body.wcvs-view-list ul.products li.product .add_to_cart_button{grid-column:1 / -1;grid-row:3;margin:12px 0 0 !important}
+  body.wcvs-view-list .wcvs-details-btn{grid-column:1 / -1;grid-row:4;margin-top:8px}
+}
+
+/* ==========================================================
+   Quick View (v1.1.0)
+   ========================================================== */
+
+/* ---- ปุ่ม View บนรูปสินค้า ---- */
+.wcvs-qv-wrap{display:none}
+body[class*="wcvs-view-"] .wcvs-qv-wrap{
+  display:flex;position:absolute;top:16px;left:16px;right:16px;aspect-ratio:1/1;
+  align-items:flex-end;justify-content:center;padding-bottom:14px;box-sizing:border-box;
+  pointer-events:none;z-index:2;
+}
+.wcvs-qv-btn{
+  pointer-events:auto;display:inline-flex;align-items:center;gap:8px;
+  padding:10px 20px;border:0 !important;border-radius:999px !important;cursor:pointer;
+  background:rgba(255,255,255,.96) !important;color:var(--wcvs-dark) !important;
+  font-size:.9rem;font-weight:600;line-height:1;box-shadow:0 4px 14px rgba(13,43,58,.18);
+  transition:background .15s,color .15s,opacity .2s,transform .2s;
+}
+.wcvs-qv-btn:hover,.wcvs-qv-btn:focus-visible{background:var(--wcvs-dark) !important;color:#fff !important}
+@media (hover:hover){
+  .wcvs-qv-btn{opacity:0;transform:translateY(6px)}
+  li.product:hover .wcvs-qv-btn,.wcvs-qv-btn:focus-visible{opacity:1;transform:none}
+}
+/* List view: ให้อยู่ทับรูปในช่องเดียวกัน */
+body.wcvs-view-list .wcvs-qv-wrap{
+  position:relative;top:auto;left:auto;right:auto;width:180px;
+  grid-column:1;grid-row:1 / span 2;align-self:center;justify-self:start;
+}
+@media (max-width:960px){ body.wcvs-view-list .wcvs-qv-wrap{width:140px} }
+@media (max-width:680px){
+  body.wcvs-view-grid .wcvs-qv-wrap{top:12px;left:12px;right:12px}
+  body.wcvs-view-list .wcvs-qv-wrap{width:96px;padding-bottom:8px}
+  body.wcvs-view-list .wcvs-qv-btn span{display:none}
+  body.wcvs-view-list .wcvs-qv-btn{padding:10px}
+  .wcvs-qv-btn{padding:8px 16px}
+}
+
+/* ---- Modal ---- */
+html.wcvs-lock,html.wcvs-lock body{overflow:hidden}
+.wcvs-modal{position:fixed;inset:0;z-index:999999;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+.wcvs-modal.is-open{display:flex}
+.wcvs-modal-backdrop{position:absolute;inset:0;background:rgba(13,43,58,.55);backdrop-filter:blur(2px);animation:wcvsFade .2s ease}
+.wcvs-modal-dialog{
+  position:relative;width:100%;max-width:860px;max-height:min(86vh,720px);overflow:auto;
+  background:#fff;border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.28);outline:none;
+  animation:wcvsPop .22s ease;color:var(--wcvs-dark);
+}
+.wcvs-modal-close{
+  position:absolute;top:14px;right:14px;z-index:5;width:42px;height:42px;padding:0;border-radius:50% !important;
+  border:1px solid var(--wcvs-border) !important;background:#fff !important;color:var(--wcvs-dark) !important;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.wcvs-modal-close:hover{background:var(--wcvs-dark) !important;color:#fff !important}
+@keyframes wcvsFade{from{opacity:0}to{opacity:1}}
+@keyframes wcvsPop{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+
+.wcvs-loading{display:flex;align-items:center;justify-content:center;min-height:320px}
+.wcvs-spinner{width:38px;height:38px;border:4px solid #e4e7ec;border-top-color:var(--wcvs-dark);border-radius:50%;animation:wcvsSpin .8s linear infinite}
+@keyframes wcvsSpin{to{transform:rotate(360deg)}}
+.wcvs-error{padding:48px 24px;text-align:center}
+
+.wcvs-qv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;padding:28px}
+.wcvs-qv-media{min-width:0}
+.wcvs-qv-main{position:relative;border-radius:18px;overflow:hidden;background:#f6f6f6;aspect-ratio:1/1}
+.wcvs-qv-main-img{display:block;width:100%;height:100%;object-fit:cover}
+.wcvs-qv-sale{position:absolute;top:12px;right:12px;z-index:2;background:var(--wcvs-dark);color:#fff;border-radius:999px;padding:5px 12px;font-size:.85rem;font-weight:700}
+.wcvs-qv-thumbs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.wcvs-qv-thumb{width:56px;height:56px;padding:0;border:2px solid transparent !important;border-radius:12px !important;overflow:hidden;background:#f6f6f6 !important;cursor:pointer;opacity:.7}
+.wcvs-qv-thumb.is-active,.wcvs-qv-thumb:hover{border-color:var(--wcvs-dark) !important;opacity:1}
+.wcvs-qv-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+
+.wcvs-qv-info{min-width:0;display:flex;flex-direction:column;padding-top:6px;padding-right:34px}
+.wcvs-qv-title{font-size:1.4rem;line-height:1.35;margin:0 0 8px;color:var(--wcvs-dark)}
+.wcvs-qv-price{font-size:1.4rem;font-weight:700;margin-bottom:14px}
+.wcvs-qv-price del{opacity:.5;font-weight:400;font-size:1rem;margin-right:6px}
+.wcvs-qv-price ins{color:var(--wcvs-sale);text-decoration:none;background:none}
+.wcvs-qv-desc{font-size:.95rem;line-height:1.6;margin-bottom:14px;max-height:140px;overflow:auto}
+.wcvs-qv-desc p{margin:0 0 .6em}
+.wcvs-qv-meta{list-style:none;margin:0 0 18px;padding:0;font-size:.9rem;color:#5b6573}
+.wcvs-qv-meta li{margin:0 0 4px}
+.wcvs-qv-meta li span{font-weight:600;color:var(--wcvs-dark);margin-right:4px}
+.wcvs-qv-meta .stock{margin:0}
+.wcvs-qv-cart{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+
+.wcvs-qty{display:inline-flex;align-items:center;border:1px solid var(--wcvs-border);border-radius:999px;background:#fff;height:52px}
+.wcvs-qty button{width:44px;height:100%;border:0 !important;background:transparent !important;color:var(--wcvs-dark) !important;font-size:1.3rem;cursor:pointer;padding:0}
+.wcvs-qty input{width:46px;border:0 !important;background:transparent !important;text-align:center;font-weight:600;padding:0;-moz-appearance:textfield;box-shadow:none}
+.wcvs-qty input::-webkit-outer-spin-button,.wcvs-qty input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+.wcvs-qv-add,.wcvs-qv-cart .single_add_to_cart_button{
+  flex:1 1 160px;display:inline-flex;align-items:center;justify-content:center;height:52px;padding:0 24px;
+  border-radius:999px !important;border:0;background:var(--wcvs-dark) !important;color:#fff !important;
+  font-weight:600;text-align:center;text-decoration:none;cursor:pointer;
+}
+.wcvs-qv-add:hover,.wcvs-qv-cart .single_add_to_cart_button:hover{background:#000 !important}
+.wcvs-qv-add.loading{opacity:.6;pointer-events:none}
+.wcvs-qv-add.added::after{content:"\2713";margin-left:8px}
+.wcvs-qv-cart .added_to_cart{flex:0 0 100%;text-align:center;font-weight:600;color:var(--wcvs-dark)}
+
+/* ฟอร์มสินค้าแบบมีตัวเลือก */
+.wcvs-qv-cart form.cart{width:100%}
+.wcvs-qv-cart table.variations{width:100%;margin:0 0 12px;border:0}
+.wcvs-qv-cart table.variations td,.wcvs-qv-cart table.variations th{display:block;padding:0 0 6px;border:0;text-align:left}
+.wcvs-qv-cart table.variations select{width:100%;height:46px;border:1px solid var(--wcvs-border);border-radius:999px;padding:0 18px;background:#fff}
+.wcvs-qv-cart .reset_variations{font-size:.85rem}
+.wcvs-qv-cart .woocommerce-variation-add-to-cart{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.wcvs-qv-cart .quantity input.qty{height:52px;width:80px;border-radius:999px;border:1px solid var(--wcvs-border);text-align:center}
+
+.wcvs-qv-full{margin-top:auto;font-weight:600;color:var(--wcvs-dark);text-decoration:none}
+.wcvs-qv-full:hover{text-decoration:underline}
+
+@media (max-width:720px){
+  .wcvs-modal{align-items:flex-end;padding:0}
+  .wcvs-modal-dialog{max-width:100%;max-height:92vh;border-radius:24px 24px 0 0}
+  .wcvs-qv{grid-template-columns:1fr;gap:18px;padding:18px}
+  .wcvs-qv-info{padding-right:0}
+  .wcvs-qv-main{aspect-ratio:4/3}
+}
+
+/* ==========================================================
+   Filter (v2.0.0)  – sidebar บนจอใหญ่ / drawer บนมือถือ
+   ========================================================== */
+.wcvs-layout{display:flex;align-items:flex-start;width:100%;box-sizing:border-box}
+.wcvs-main{flex:1 1 0;min-width:0}
+.wcvs-filter-backdrop{display:none}
+
+/* ปุ่ม Filters */
+.wcvs-filter-toggle{
+  display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 20px;
+  border:1px solid var(--wcvs-border) !important;border-radius:999px !important;
+  background:#fff !important;color:var(--wcvs-dark) !important;font-weight:600;cursor:pointer;transition:.15s;
+}
+.wcvs-filter-toggle:hover{border-color:var(--wcvs-dark) !important}
+body.wcvs-filter-open .wcvs-filter-toggle{background:var(--wcvs-dark) !important;color:#fff !important;border-color:var(--wcvs-dark) !important}
+.wcvs-badge{
+  min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--wcvs-sale);color:#fff;
+  font-size:.75rem;line-height:22px;text-align:center;font-weight:700;
+}
+
+/* แผง */
+.wcvs-filter{
+  flex:0 0 270px;width:270px;box-sizing:border-box;margin-right:28px;padding:22px;
+  background:#fff;border:1px solid var(--wcvs-border);border-radius:24px;color:var(--wcvs-dark);
+  position:sticky;top:24px;max-height:calc(100vh - 48px);overflow:auto;
+  transition:flex-basis .3s ease,width .3s ease,margin .3s ease,padding .3s ease,opacity .2s ease,border-width .3s;
+}
+body.wcvs-filter-closed .wcvs-filter{
+  flex-basis:0;width:0;margin-right:0;padding-left:0;padding-right:0;border-width:0;opacity:0;visibility:hidden;overflow:hidden;
+}
+.wcvs-filter-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:1.05rem}
+.wcvs-filter-head strong{flex:1 1 auto}
+.wcvs-clear{font-size:.85rem;color:var(--wcvs-sale);text-decoration:underline}
+.wcvs-filter-close{
+  display:none;width:38px;height:38px;padding:0;border-radius:50% !important;border:1px solid var(--wcvs-border) !important;
+  background:#fff !important;color:var(--wcvs-dark) !important;align-items:center;justify-content:center;cursor:pointer;
+}
+.wcvs-filter-close:hover{background:var(--wcvs-dark) !important;color:#fff !important}
+
+.wcvs-fs{border-top:1px solid var(--wcvs-border);padding:10px 0}
+.wcvs-fs summary{
+  list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-weight:700;padding:6px 0;
+}
+.wcvs-fs summary::-webkit-details-marker{display:none}
+.wcvs-fs summary::after{
+  content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;
+  transform:rotate(45deg);transition:transform .2s;margin-right:4px;
+}
+.wcvs-fs[open] summary::after{transform:rotate(-135deg)}
+.wcvs-fs-body{padding:8px 0 2px}
+
+/* หมวดหมู่ */
+.wcvs-cats{list-style:none;margin:0;padding:0}
+.wcvs-fs-body > .wcvs-cats{max-height:280px;overflow:auto}
+.wcvs-cats-sub{margin:0 0 2px 26px}
+.wcvs-cats li{margin:0;padding:0}
+.wcvs-cats label{display:flex;align-items:center;gap:10px;padding:6px 0;margin:0;cursor:pointer}
+.wcvs-cats input[type=checkbox]{width:18px;height:18px;margin:0;accent-color:var(--wcvs-dark);flex:0 0 auto}
+.wcvs-cat-name{flex:1 1 auto}
+.wcvs-count{font-style:normal;font-size:.78rem;color:#7a8594;background:var(--wcvs-card);border-radius:999px;padding:1px 8px}
+
+/* ช่วงราคา */
+.wcvs-range{position:relative;height:28px;margin:6px 10px 14px}
+.wcvs-range-track{position:absolute;left:0;right:0;top:50%;height:6px;margin-top:-3px;background:#e4e7ec;border-radius:3px}
+.wcvs-range-fill{position:absolute;top:0;bottom:0;background:var(--wcvs-dark);border-radius:3px}
+.wcvs-range input[type=range]{
+  position:absolute;left:-10px;width:calc(100% + 20px);top:0;height:28px;margin:0;padding:0;
+  background:none;pointer-events:none;-webkit-appearance:none;appearance:none;
+}
+.wcvs-range input[type=range]::-webkit-slider-runnable-track{background:transparent;height:28px;border:0}
+.wcvs-range input[type=range]::-moz-range-track{background:transparent;height:28px;border:0}
+.wcvs-range input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;pointer-events:auto;width:22px;height:22px;margin-top:3px;border-radius:50%;
+  background:#fff;border:3px solid var(--wcvs-dark);box-shadow:0 2px 6px rgba(13,43,58,.25);cursor:grab;
+}
+.wcvs-range input[type=range]::-moz-range-thumb{
+  pointer-events:auto;width:16px;height:16px;border-radius:50%;
+  background:#fff;border:3px solid var(--wcvs-dark);box-shadow:0 2px 6px rgba(13,43,58,.25);cursor:grab;
+}
+.wcvs-price-inputs{display:flex;align-items:center;gap:8px}
+.wcvs-price-inputs i{font-style:normal}
+.wcvs-price-inputs label{position:relative;flex:1 1 0;margin:0;min-width:0}
+.wcvs-price-inputs label span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#7a8594;pointer-events:none}
+.wcvs-price-inputs input{
+  width:100%;height:44px;padding:0 10px 0 30px;border:1px solid var(--wcvs-border);border-radius:999px;
+  background:#fff;box-sizing:border-box;font-weight:600;color:var(--wcvs-dark);
+}
+
+.wcvs-filter-actions{display:flex;align-items:center;gap:16px;margin-top:14px;padding-top:16px;border-top:1px solid var(--wcvs-border)}
+.wcvs-apply{
+  flex:1 1 auto;height:46px;padding:0 24px;border:0;border-radius:999px !important;
+  background:var(--wcvs-dark) !important;color:#fff !important;font-weight:600;cursor:pointer;
+}
+.wcvs-apply:hover{background:#000 !important}
+.wcvs-reset{color:var(--wcvs-dark);text-decoration:underline;font-size:.9rem}
+
+/* เปิดแผงแล้วลดคอลัมน์ลง 1 เพื่อไม่ให้การ์ดแคบเกินไป */
+@media (min-width:1201px){
+  body.wcvs-filter-open.wcvs-view-grid ul.products{grid-template-columns:repeat(var(--wcvs-cols-open),minmax(0,1fr))}
+}
+@media (min-width:961px) and (max-width:1200px){
+  body.wcvs-filter-open.wcvs-view-grid ul.products{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* มือถือ/แท็บเล็ต: drawer เลื่อนจากซ้าย */
+@media (max-width:960px){
+  .wcvs-layout{display:block}
+  .wcvs-filter{
+    position:fixed;top:0;left:0;bottom:0;z-index:999990;width:min(340px,88vw);max-height:none;margin:0;
+    border-radius:0 24px 24px 0;transform:translateX(-105%);visibility:hidden;opacity:1;
+    transition:transform .3s ease,visibility 0s linear .3s;box-shadow:0 0 40px rgba(0,0,0,.25);padding:22px !important;border-width:1px !important;
+    flex:none;
+  }
+  body.wcvs-drawer-open .wcvs-filter{transform:none;visibility:visible;transition:transform .3s ease,visibility 0s}
+  body.wcvs-filter-closed .wcvs-filter{width:min(340px,88vw)}
+  .wcvs-filter-close{display:inline-flex}
+  .wcvs-filter-backdrop{
+    display:block;position:fixed;inset:0;z-index:999980;background:rgba(13,43,58,.5);
+    opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s linear .3s;
+  }
+  body.wcvs-drawer-open .wcvs-filter-backdrop{opacity:1;visibility:visible;transition:opacity .3s,visibility 0s}
+  body.wcvs-drawer-open{overflow:hidden}
+  body.wcvs-filter-open .wcvs-filter-toggle{background:#fff !important;color:var(--wcvs-dark) !important;border-color:var(--wcvs-border) !important}
+  body.wcvs-drawer-open .wcvs-filter-toggle{background:var(--wcvs-dark) !important;color:#fff !important}
+}
+@media (max-width:680px){
+  .wcvs-filter-toggle{height:44px;padding:0 16px}
+}
