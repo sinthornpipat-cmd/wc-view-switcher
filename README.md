@@ -1,5 +1,7 @@
 # Grid/List View Switcher for WooCommerce
 
+![Banner](.wordpress-org/banner-1544x500.png)
+
 ปลั๊กอิน WooCommerce สำหรับสลับมุมมองสินค้าแบบ Grid / List พร้อม Quick View popup และแผงตัวกรองหมวดหมู่ / ช่วงราคา
 
 > ไฟล์ `readme.txt` (ภาษาอังกฤษ) คือไฟล์ที่ WordPress.org ใช้แสดงในหน้าปลั๊กอิน ไฟล์นี้เป็นคู่มือภาษาไทยสำหรับ GitHub

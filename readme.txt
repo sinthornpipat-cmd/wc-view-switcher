@@ -100,10 +100,7 @@ Styles and scripts load only on shop, product category / tag, product search and
 
 == Screenshots ==
 
-1. Grid view with the filter panel open.
-2. List view with View Details buttons.
-3. Quick View popup.
-4. Settings page.
+1. Shoppers switch between grid and list views with one click.
 
 == Changelog ==
 
