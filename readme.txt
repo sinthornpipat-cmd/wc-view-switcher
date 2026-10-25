@@ -4,7 +4,7 @@ Tags: woocommerce, grid view, list view, quick view, product filter
 Requires at least: 6.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -104,5 +104,5 @@ Styles and scripts load only on shop, product category / tag, product search and
 
 == Changelog ==
 
-= 2.0.0 =
+= 1.0.0 =
 * Initial public release.
