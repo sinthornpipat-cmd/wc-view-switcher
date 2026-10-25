@@ -29,7 +29,7 @@
       '<div class="wcvs-modal" aria-hidden="true">' +
         '<div class="wcvs-modal-backdrop" data-close></div>' +
         '<div class="wcvs-modal-dialog" role="dialog" aria-modal="true" tabindex="-1">' +
-          '<button type="button" class="wcvs-modal-close" data-close aria-label="Close">' +
+          '<button type="button" class="wcvs-modal-close" data-close>' +
             '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>' +
           '</button>' +
           '<div class="wcvs-modal-body"></div>' +
@@ -37,6 +37,7 @@
       '</div>'
     ).appendTo(document.body);
     $body = $modal.find('.wcvs-modal-body');
+    $modal.find('.wcvs-modal-close').attr('aria-label', WCVS.close || 'Close');
 
     $modal.on('click', '[data-close]', closeModal);
 
@@ -110,11 +111,15 @@
           $body.find('.variations_form').each(function () { $(this).wc_variation_form(); });
         }
       } else {
-        $body.html('<p class="wcvs-error">' + WCVS.error + '</p>');
+        showError();
       }
     }).fail(function (jq, status) {
-      if (status !== 'abort') $body.html('<p class="wcvs-error">' + WCVS.error + '</p>');
+      if (status !== 'abort') showError();
     });
+  }
+
+  function showError() {
+    $body.empty().append($('<p class="wcvs-error"></p>').text(WCVS.error));
   }
 
   function closeModal() {

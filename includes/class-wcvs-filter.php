@@ -47,8 +47,11 @@ class WCVS_Filter {
 	public function state() {
 		$o = $this->opts();
 		$s = ( isset( $o['filter_default'] ) && 'closed' === $o['filter_default'] ) ? 'closed' : 'open';
-		if ( isset( $_COOKIE[ self::COOKIE ] ) && in_array( $_COOKIE[ self::COOKIE ], array( 'open', 'closed' ), true ) ) {
-			$s = $_COOKIE[ self::COOKIE ];
+		if ( isset( $_COOKIE[ self::COOKIE ] ) ) {
+			$cookie = sanitize_key( wp_unslash( $_COOKIE[ self::COOKIE ] ) );
+			if ( in_array( $cookie, array( 'open', 'closed' ), true ) ) {
+				$s = $cookie;
+			}
 		}
 		return $s;
 	}
@@ -82,11 +85,13 @@ class WCVS_Filter {
 
 	/* ---------- ค่าที่ผู้ใช้เลือก ---------- */
 
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- filters are public, read-only GET requests.
+
 	public function selected_cats() {
 		if ( ! isset( $_GET['wcvs_cat'] ) ) {
 			return array();
 		}
-		$raw = wp_unslash( $_GET['wcvs_cat'] );
+		$raw = wp_unslash( $_GET['wcvs_cat'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each item is sanitized below.
 		if ( is_string( $raw ) ) {
 			$raw = explode( ',', $raw );
 		}
@@ -109,7 +114,7 @@ class WCVS_Filter {
 		if ( ! isset( $_GET[ $key ] ) ) {
 			return null;
 		}
-		$v = wp_unslash( $_GET[ $key ] );
+		$v = sanitize_text_field( wp_unslash( $_GET[ $key ] ) );
 		if ( ! is_scalar( $v ) || '' === $v || ! is_numeric( $v ) ) {
 			return null;
 		}
@@ -120,11 +125,14 @@ class WCVS_Filter {
 		return array( $this->num( 'min_price' ), $this->num( 'max_price' ) );
 	}
 
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
 	/** ขอบเขตราคาต่ำสุด/สูงสุดของร้าน (cache 10 นาที) */
 	public function bounds() {
 		$b = get_transient( 'wcvs_price_bounds' );
 		if ( false === $b ) {
 			global $wpdb;
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery -- static aggregate query with no user input; cached in a transient below.
 			$mn = 0;
 			$mx = 0;
 			if ( ! empty( $wpdb->wc_product_meta_lookup ) ) {
@@ -155,6 +163,7 @@ class WCVS_Filter {
 				'min' => (int) floor( $mn ),
 				'max' => (int) ceil( $mx ),
 			);
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery
 			set_transient( 'wcvs_price_bounds', $b, 10 * MINUTE_IN_SECONDS );
 		}
 		return $b;
@@ -279,7 +288,7 @@ class WCVS_Filter {
 		echo '<div class="wcvs-toolbar">';
 		$this->print_toggle();
 		echo '</div>';
-		echo '<p class="woocommerce-info">' . esc_html__( 'No products were found matching your selection.', 'woocommerce' ) . '</p>';
+		echo '<p class="woocommerce-info">' . esc_html__( 'No products were found matching your selection.', 'grid-list-view-switcher-for-woocommerce' ) . '</p>';
 		$this->layout_close();
 	}
 
@@ -292,21 +301,23 @@ class WCVS_Filter {
 	private function print_toggle() {
 		$n    = $this->active_count();
 		$open = ( 'open' === $this->state() );
-		printf(
-			'<button type="button" class="wcvs-filter-toggle" aria-controls="wcvs-filter" aria-expanded="%1$s"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z"/></svg><span>%2$s</span>%3$s</button>',
-			$open ? 'true' : 'false',
-			esc_html__( 'Filters', 'wc-view-switcher' ),
-			$n ? '<b class="wcvs-badge">' . (int) $n . '</b>' : ''
-		);
+		?>
+		<button type="button" class="wcvs-filter-toggle" aria-controls="wcvs-filter" aria-expanded="<?php echo $open ? 'true' : 'false'; ?>"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z"/></svg><span><?php esc_html_e( 'Filters', 'grid-list-view-switcher-for-woocommerce' ); ?></span><?php if ( $n ) : ?><b class="wcvs-badge"><?php echo (int) $n; ?></b><?php endif; ?></button>
+		<?php
 	}
 
 	/* ---------- Panel ---------- */
 
+	/** URL ของหน้าปัจจุบัน (ไม่มี query/หน้าแบ่ง) โดยใช้โดเมนจาก home_url() ไม่ใช่ Host header */
 	private function base_url() {
-		$req  = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '/';
-		$path = strtok( $req, '?' );
-		$path = preg_replace( '#/page/\d+/?$#', '/', (string) $path );
-		$host = isset( $_SERVER['HTTP_HOST'] ) ? preg_replace( '/[^a-z0-9\.\-:\[\]]/i', '', wp_unslash( $_SERVER['HTTP_HOST'] ) ) : (string) wp_parse_url( home_url(), PHP_URL_HOST );
+		$req  = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
+		$path = (string) wp_parse_url( $req, PHP_URL_PATH );
+		$path = preg_replace( '#/page/\d+/?$#', '/', '' === $path ? '/' : $path );
+		$home = wp_parse_url( home_url() );
+		$host = isset( $home['host'] ) ? $home['host'] : '';
+		if ( isset( $home['port'] ) ) {
+			$host .= ':' . (int) $home['port'];
+		}
 		return set_url_scheme( '//' . $host . $path );
 	}
 
@@ -314,11 +325,12 @@ class WCVS_Filter {
 	private function kept_params() {
 		$skip = array( 'wcvs_cat', 'min_price', 'max_price', 'paged', 'product-page' );
 		$out  = array();
-		foreach ( $_GET as $k => $v ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- carries public query args (orderby, s, ...) into the filter form; every key and value is sanitized.
+		foreach ( wp_unslash( $_GET ) as $k => $v ) {
 			if ( in_array( $k, $skip, true ) || ! is_scalar( $v ) ) {
 				continue;
 			}
-			$out[ sanitize_key( $k ) ] = sanitize_text_field( wp_unslash( (string) $v ) );
+			$out[ sanitize_key( $k ) ] = sanitize_text_field( (string) $v );
 		}
 		return $out;
 	}
@@ -390,13 +402,13 @@ class WCVS_Filter {
 		$step                = ( $b['max'] - $b['min'] ) > 5000 ? 10 : 1;
 		$symbol              = function_exists( 'get_woocommerce_currency_symbol' ) ? html_entity_decode( get_woocommerce_currency_symbol() ) : '';
 		?>
-		<aside class="wcvs-filter" id="wcvs-filter" aria-label="<?php esc_attr_e( 'Filters', 'wc-view-switcher' ); ?>">
+		<aside class="wcvs-filter" id="wcvs-filter" aria-label="<?php esc_attr_e( 'Filters', 'grid-list-view-switcher-for-woocommerce' ); ?>">
 			<div class="wcvs-filter-head">
-				<strong><?php esc_html_e( 'Filters', 'wc-view-switcher' ); ?></strong>
+				<strong><?php esc_html_e( 'Filters', 'grid-list-view-switcher-for-woocommerce' ); ?></strong>
 				<?php if ( $n ) : ?>
-					<a class="wcvs-clear" href="<?php echo esc_url( $reset ); ?>"><?php esc_html_e( 'Clear all', 'wc-view-switcher' ); ?></a>
+					<a class="wcvs-clear" href="<?php echo esc_url( $reset ); ?>"><?php esc_html_e( 'Clear all', 'grid-list-view-switcher-for-woocommerce' ); ?></a>
 				<?php endif; ?>
-				<button type="button" class="wcvs-filter-close" aria-label="<?php esc_attr_e( 'Close', 'wc-view-switcher' ); ?>">
+				<button type="button" class="wcvs-filter-close" aria-label="<?php esc_attr_e( 'Close', 'grid-list-view-switcher-for-woocommerce' ); ?>">
 					<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
 				</button>
 			</div>
@@ -408,7 +420,7 @@ class WCVS_Filter {
 
 				<?php if ( $show_cats ) : ?>
 					<details class="wcvs-fs" open>
-						<summary><?php esc_html_e( 'Categories', 'wc-view-switcher' ); ?></summary>
+						<summary><?php esc_html_e( 'Categories', 'grid-list-view-switcher-for-woocommerce' ); ?></summary>
 						<div class="wcvs-fs-body">
 							<?php $this->cat_list( $parent, $selected, ! empty( $o['filter_count'] ) ); ?>
 						</div>
@@ -417,13 +429,13 @@ class WCVS_Filter {
 
 				<?php if ( $show_price ) : ?>
 					<details class="wcvs-fs" open>
-						<summary><?php esc_html_e( 'Price range', 'wc-view-switcher' ); ?></summary>
+						<summary><?php esc_html_e( 'Price range', 'grid-list-view-switcher-for-woocommerce' ); ?></summary>
 						<div class="wcvs-fs-body">
 							<div class="wcvs-price" data-min="<?php echo (int) $b['min']; ?>" data-max="<?php echo (int) $b['max']; ?>">
 								<div class="wcvs-range">
 									<div class="wcvs-range-track"><div class="wcvs-range-fill"></div></div>
-									<input type="range" class="wcvs-range-min" min="<?php echo (int) $b['min']; ?>" max="<?php echo (int) $b['max']; ?>" step="<?php echo (int) $step; ?>" value="<?php echo (int) $cur_min; ?>" aria-label="Min price">
-									<input type="range" class="wcvs-range-max" min="<?php echo (int) $b['min']; ?>" max="<?php echo (int) $b['max']; ?>" step="<?php echo (int) $step; ?>" value="<?php echo (int) $cur_max; ?>" aria-label="Max price">
+									<input type="range" class="wcvs-range-min" min="<?php echo (int) $b['min']; ?>" max="<?php echo (int) $b['max']; ?>" step="<?php echo (int) $step; ?>" value="<?php echo (int) $cur_min; ?>" aria-label="<?php esc_attr_e( 'Min price', 'grid-list-view-switcher-for-woocommerce' ); ?>">
+									<input type="range" class="wcvs-range-max" min="<?php echo (int) $b['min']; ?>" max="<?php echo (int) $b['max']; ?>" step="<?php echo (int) $step; ?>" value="<?php echo (int) $cur_max; ?>" aria-label="<?php esc_attr_e( 'Max price', 'grid-list-view-switcher-for-woocommerce' ); ?>">
 								</div>
 								<div class="wcvs-price-inputs">
 									<label><span><?php echo esc_html( $symbol ); ?></span>
@@ -438,8 +450,8 @@ class WCVS_Filter {
 				<?php endif; ?>
 
 				<div class="wcvs-filter-actions">
-					<button type="submit" class="wcvs-apply"><?php esc_html_e( 'Apply', 'wc-view-switcher' ); ?></button>
-					<a class="wcvs-reset" href="<?php echo esc_url( $reset ); ?>"><?php esc_html_e( 'Reset', 'wc-view-switcher' ); ?></a>
+					<button type="submit" class="wcvs-apply"><?php esc_html_e( 'Apply', 'grid-list-view-switcher-for-woocommerce' ); ?></button>
+					<a class="wcvs-reset" href="<?php echo esc_url( $reset ); ?>"><?php esc_html_e( 'Reset', 'grid-list-view-switcher-for-woocommerce' ); ?></a>
 				</div>
 			</form>
 		</aside>
